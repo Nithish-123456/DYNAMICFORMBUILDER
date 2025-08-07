@@ -19,7 +19,7 @@ export interface WorkflowEdge {
   id: string;
   source: string;
   target: string;
-  type?: 'default' | 'conditional';
+  type?: string;
   data?: {
     condition?: string;
     label?: string;
@@ -44,4 +44,3 @@ export interface WorkflowState {
   selectedNode: string | null;
   isWorkflowMode: boolean;
 }
-

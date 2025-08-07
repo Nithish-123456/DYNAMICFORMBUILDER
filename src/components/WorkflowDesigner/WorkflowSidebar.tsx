@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDrag } from 'react-dnd';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { addWorkflowNode } from '../../store/slices/workflowSlice';
@@ -13,6 +14,49 @@ import {
   Square,
   Plus,
 } from 'lucide-react';
+
+const DraggableNode: React.FC<{ template: any }> = ({ template }) => {
+   const handleDragStart = (event: React.DragEvent) => {
+    // FIXED: Ensure proper data transfer
+    event.dataTransfer.setData('application/reactflow', template.type);
+    event.dataTransfer.effectAllowed = 'move';
+    
+    // FIXED: Add drag image for better UX (optional)
+    const dragImage = document.createElement('div');
+    dragImage.innerHTML = template.label;
+    dragImage.style.position = 'absolute';
+    dragImage.style.top = '-1000px';
+    document.body.appendChild(dragImage);
+    event.dataTransfer.setDragImage(dragImage, 0, 0);
+    
+    // Clean up
+    setTimeout(() => document.body.removeChild(dragImage), 0);
+  };
+const handleDragEnd = (event: React.DragEvent) => {
+    event.preventDefault();
+  };
+  const IconComponent = template.icon;
+
+  return (
+    <div
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing hover:border-blue-300"
+    >
+      <div className="flex items-start space-x-3">
+        <div className={`p-2 rounded-md ${template.color}`}>
+          <IconComponent className="w-4 h-4" />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-medium text-gray-800">{template.label}</h3>
+          <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+        </div>
+        <Plus className="w-4 h-4 text-gray-400" />
+      </div>
+    </div>
+  );
+};
 
 const WorkflowSidebar: React.FC = () => {
   const dispatch = useDispatch();
@@ -49,28 +93,6 @@ const WorkflowSidebar: React.FC = () => {
     },
   ];
 
-  const addNode = (type: string) => {
-    if (!currentWorkflow) return;
-
-    const nodeCount = currentWorkflow.nodes.filter(n => n.type === type).length;
-    const level = Math.floor(currentWorkflow.nodes.length / 2) + 1;
-
-    const newNode: WorkflowNode = {
-      id: `${type}-${uuidv4()}`,
-      type: type as any,
-      position: {
-        x: 250 + (nodeCount * 200),
-        y: 150 + (level * 100),
-      },
-      data: {
-        label: `${type.charAt(0).toUpperCase() + type.slice(1)} ${nodeCount + 1}`,
-        level: `Level ${level}`,
-      },
-    };
-
-    dispatch(addWorkflowNode(newNode));
-  };
-
   return (
     <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
       <div className="p-4 border-b border-gray-200">
@@ -81,24 +103,11 @@ const WorkflowSidebar: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="space-y-3">
           {nodeTemplates.map((template) => {
-            const IconComponent = template.icon;
             return (
-              <div
+              <DraggableNode
                 key={template.type}
-                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => addNode(template.type)}
-              >
-                <div className="flex items-start space-x-3">
-                  <div className={`p-2 rounded-md ${template.color}`}>
-                    <IconComponent className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-800">{template.label}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{template.description}</p>
-                  </div>
-                  <Plus className="w-4 h-4 text-gray-400" />
-                </div>
-              </div>
+                template={template}
+              />
             );
           })}
         </div>

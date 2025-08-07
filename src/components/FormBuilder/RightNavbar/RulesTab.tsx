@@ -7,13 +7,13 @@ import { Plus, Trash2 } from 'lucide-react';
 const RulesTab: React.FC = () => {
   const dispatch = useDispatch();
   const { selectedElement, currentForm } = useSelector((state: RootState) => state.formBuilder);
-  
+
   const element = selectedElement ? currentForm.elements.find(el => el.id === selectedElement) : null;
   const availableFields = currentForm.elements.filter(el => el.id !== selectedElement);
 
   const handleAddCondition = () => {
     if (!element) return;
-    
+
     const newCondition = {
       id: Date.now().toString(),
       field: '',
@@ -25,17 +25,17 @@ const RulesTab: React.FC = () => {
     dispatch(updateElement({
       id: element.id,
       updates: {
-        conditions: [...(element.conditions || []), newCondition]
+        conditions: [...(element.conditions ?? []), newCondition]
       }
     }));
   };
 
   const handleUpdateCondition = (conditionId: string, updates: any) => {
     if (!element) return;
-    
-    const updatedConditions = element.conditions?.map(condition =>
+
+    const updatedConditions = (element.conditions ?? []).map(condition =>
       condition.id === conditionId ? { ...condition, ...updates } : condition
-    ) || [];
+    );
 
     dispatch(updateElement({
       id: element.id,
@@ -45,10 +45,10 @@ const RulesTab: React.FC = () => {
 
   const handleRemoveCondition = (conditionId: string) => {
     if (!element) return;
-    
-    const updatedConditions = element.conditions?.filter(
+
+    const updatedConditions = (element.conditions ?? []).filter(
       condition => condition.id !== conditionId
-    ) || [];
+    );
 
     dispatch(updateElement({
       id: element.id,
@@ -58,7 +58,7 @@ const RulesTab: React.FC = () => {
 
   const handleAddValidation = () => {
     if (!element) return;
-    
+
     const newValidation = {
       id: Date.now().toString(),
       type: 'required' as const,
@@ -69,17 +69,17 @@ const RulesTab: React.FC = () => {
     dispatch(updateElement({
       id: element.id,
       updates: {
-        validations: [...(element.validations || []), newValidation]
+        validations: [...(element.validations ?? []), newValidation]
       }
     }));
   };
 
   const handleUpdateValidation = (validationId: string, updates: any) => {
     if (!element) return;
-    
-    const updatedValidations = element.validations?.map(validation =>
+
+    const updatedValidations = (element.validations ?? []).map(validation =>
       validation.id === validationId ? { ...validation, ...updates } : validation
-    ) || [];
+    );
 
     dispatch(updateElement({
       id: element.id,
@@ -89,10 +89,10 @@ const RulesTab: React.FC = () => {
 
   const handleRemoveValidation = (validationId: string) => {
     if (!element) return;
-    
-    const updatedValidations = element.validations?.filter(
+
+    const updatedValidations = (element.validations ?? []).filter(
       validation => validation.id !== validationId
-    ) || [];
+    );
 
     dispatch(updateElement({
       id: element.id,
@@ -122,9 +122,9 @@ const RulesTab: React.FC = () => {
             Add Condition
           </button>
         </div>
-        
+
         <div className="space-y-3">
-          {element.conditions?.map((condition) => (
+          {(element.conditions ?? []).map((condition) => (
             <div key={condition.id} className="p-3 border border-gray-200 rounded-md">
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <select
@@ -137,7 +137,7 @@ const RulesTab: React.FC = () => {
                   <option value="enable">Enable</option>
                   <option value="disable">Disable</option>
                 </select>
-                
+
                 <button
                   onClick={() => handleRemoveCondition(condition.id)}
                   className="flex items-center justify-center px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded"
@@ -145,7 +145,7 @@ const RulesTab: React.FC = () => {
                   <Trash2 size={12} />
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 gap-2">
                 <select
                   value={condition.field}
@@ -155,11 +155,11 @@ const RulesTab: React.FC = () => {
                   <option value="">Select Field</option>
                   {availableFields.map((field) => (
                     <option key={field.id} value={field.id}>
-                      {field.properties.label || field.type}
+                      {field.properties?.label || field.type}
                     </option>
                   ))}
                 </select>
-                
+
                 <select
                   value={condition.operator}
                   onChange={(e) => handleUpdateCondition(condition.id, { operator: e.target.value })}
@@ -174,7 +174,7 @@ const RulesTab: React.FC = () => {
                   <option value="is_empty">Is Empty</option>
                   <option value="is_not_empty">Is Not Empty</option>
                 </select>
-                
+
                 {!['is_empty', 'is_not_empty'].includes(condition.operator) && (
                   <input
                     type="text"
@@ -187,7 +187,7 @@ const RulesTab: React.FC = () => {
               </div>
             </div>
           ))}
-          
+
           {(!element.conditions || element.conditions.length === 0) && (
             <div className="text-xs text-gray-500 text-center py-4">
               No conditions set. Click "Add Condition" to create conditional logic.
@@ -208,9 +208,9 @@ const RulesTab: React.FC = () => {
             Add Rule
           </button>
         </div>
-        
+
         <div className="space-y-3">
-          {element.validations?.map((validation) => (
+          {(element.validations ?? []).map((validation) => (
             <div key={validation.id} className="p-3 border border-gray-200 rounded-md">
               <div className="flex items-center justify-between mb-2">
                 <select
@@ -227,7 +227,7 @@ const RulesTab: React.FC = () => {
                   <option value="min_value">Min Value</option>
                   <option value="max_value">Max Value</option>
                 </select>
-                
+
                 <button
                   onClick={() => handleRemoveValidation(validation.id)}
                   className="flex items-center justify-center px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded"
@@ -235,7 +235,7 @@ const RulesTab: React.FC = () => {
                   <Trash2 size={12} />
                 </button>
               </div>
-              
+
               {!['required', 'email', 'number'].includes(validation.type) && (
                 <input
                   type="text"
@@ -248,7 +248,7 @@ const RulesTab: React.FC = () => {
                   className="w-full px-2 py-1 text-xs border border-gray-300 rounded mb-2"
                 />
               )}
-              
+
               <input
                 type="text"
                 value={validation.message}
@@ -258,7 +258,7 @@ const RulesTab: React.FC = () => {
               />
             </div>
           ))}
-          
+
           {(!element.validations || element.validations.length === 0) && (
             <div className="text-xs text-gray-500 text-center py-4">
               No validation rules set. Click "Add Rule" to create validation rules.
