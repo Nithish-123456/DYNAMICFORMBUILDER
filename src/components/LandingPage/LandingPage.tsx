@@ -5,28 +5,39 @@ import { FormInput, Workflow, ArrowRight } from 'lucide-react';
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const tiles = [
-    {
-      id: 'form-builder',
-      title: 'Dynamic Form Creator',
-      description: 'Create dynamic forms with drag-and-drop interface, advanced components, and real-time preview',
-      icon: FormInput,
-      color: 'bg-blue-500',
-      hoverColor: 'hover:bg-blue-600',
-      path: '/form-builder',
-      features: ['Drag & Drop Interface', 'Advanced Components', 'Real-time Preview', 'Conditional Logic']
-    },
-    {
-      id: 'workflow-creator',
-      title: 'Dynamic Workflow Creator',
-      description: 'Design complex workflows with conditional logic, parallel processing, and form integration',
-      icon: Workflow,
-      color: 'bg-purple-500',
-      hoverColor: 'hover:bg-purple-600',
-      path: '/workflow-creator',
-      features: ['Visual Workflow Design', 'Conditional Branching', 'Parallel Processing', 'Form Integration']
-    }
-  ];
+const tiles = [
+  {
+    id: 'form-builder',
+    title: 'Dynamic Form Creator',
+    description: 'Create dynamic forms with drag-and-drop interface, advanced components, and real-time preview',
+    icon: FormInput,
+    color: 'bg-blue-500',
+    hoverColor: 'hover:bg-blue-600',
+    path: '/form-builder',
+    features: ['Drag & Drop Interface', 'Advanced Components', 'Real-time Preview', 'Conditional Logic']
+  },
+  {
+    id: 'workflow-creator',
+    title: 'Dynamic Workflow Creator',
+    description: 'Design complex workflows with conditional logic, parallel processing, and form integration',
+    icon: Workflow,
+    color: 'bg-purple-500',
+    hoverColor: 'hover:bg-purple-600',
+    path: '/workflow-creator',
+    features: ['Visual Workflow Design', 'Conditional Branching', 'Parallel Processing', 'Form Integration']
+  },
+  {
+    id: 'workflow-demo',
+    title: 'Workflow Execution Demo',
+    description: 'Simulate real-time execution of workflows with decision branches.',
+    icon: Workflow,
+    color: 'bg-green-500',
+    hoverColor: 'hover:bg-green-600',
+    path: '/workflow-demo',
+    features: ['Live Execution View', 'Branch Evaluation', 'Error Handling']
+  }
+];
+
 
   const handleTileClick = (path: string) => {
     navigate(path);
@@ -105,7 +116,7 @@ const LandingPage: React.FC = () => {
         </div>
 
         {/* Additional Info */}
-        <div className="mt-16 text-center">
+        {/* <div className="mt-16 text-center">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 max-w-4xl mx-auto">
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Why Choose Our Platform?
@@ -134,7 +145,7 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
