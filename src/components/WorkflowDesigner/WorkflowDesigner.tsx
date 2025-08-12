@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -16,6 +16,7 @@ import ReactFlow, {
   NodeTypes,
   ReactFlowProvider,
   useReactFlow,
+  Panel,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -38,14 +39,14 @@ import ActionNode from './nodes/ActionNode';
 import ParallelNode from './nodes/ParallelNode';
 import MergeNode from './nodes/MergeNode';
 import EndNode from './nodes/EndNode';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Save, Play, Pause, Menu, X, Plus } from 'lucide-react';
 
-// FIXED: Custom hook for drop functionality with proper setNodes usage
+// Custom hook for drop functionality with proper setNodes usage
 const useWorkflowDrop = (
   dispatch: any, 
   currentWorkflow: any, 
-  setNodes: any, // Add setNodes parameter
-  nodes: Node[] // Add current nodes
+  setNodes: any,
+  nodes: Node[]
 ) => {
   const reactFlow = useReactFlow();
   
@@ -54,7 +55,6 @@ const useWorkflowDrop = (
     const nodeType = event.dataTransfer.getData('application/reactflow');
     
     if (nodeType && currentWorkflow && reactFlow) {
-      // Use React Flow's project method for accurate positioning
       const position = reactFlow.project({
         x: event.clientX,
         y: event.clientY,
@@ -73,10 +73,8 @@ const useWorkflowDrop = (
         },
       };
 
-      // FIXED: Update both Redux store AND React Flow local state
       dispatch(addWorkflowNode(newNode));
       
-      // CRITICAL FIX: Add the new node to React Flow's local state
       setNodes((prevNodes: Node[]) => [
         ...prevNodes,
         {
@@ -110,6 +108,26 @@ const WorkflowDesignerContent: React.FC = () => {
   const dispatch = useDispatch();
   const { currentWorkflow, selectedNode } = useSelector((state: RootState) => state.workflow);
   const { currentForm } = useSelector((state: RootState) => state.formBuilder);
+  
+  // Mobile state management
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showProperties, setShowProperties] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+      if (window.innerWidth >= 1024) {
+        setShowSidebar(false);
+        setShowProperties(false);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const initialNodes = useMemo(() => {
     return currentWorkflow?.nodes.map(node => ({
@@ -134,10 +152,9 @@ const WorkflowDesignerContent: React.FC = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  // FIXED: Pass setNodes and nodes to the hook
   const { handleDrop, handleDragOver } = useWorkflowDrop(dispatch, currentWorkflow, setNodes, nodes);
 
-  // ADDED: Sync React Flow state with Redux when currentWorkflow changes
+  // Sync React Flow state with Redux when currentWorkflow changes
   useEffect(() => {
     if (currentWorkflow) {
       const newNodes = currentWorkflow.nodes.map(node => ({
@@ -163,8 +180,11 @@ const WorkflowDesignerContent: React.FC = () => {
   const onNodeClick = useCallback(
     (event: React.MouseEvent, node: Node) => {
       dispatch(selectWorkflowNode(node.id));
+      if (isMobile) {
+        setShowProperties(true);
+      }
     },
-    [dispatch]
+    [dispatch, isMobile]
   );
 
   const onConnect = useCallback(
@@ -187,7 +207,6 @@ const WorkflowDesignerContent: React.FC = () => {
     (changes: any) => {
       onNodesChange(changes);
       
-      // IMPROVED: Better handling of node changes
       setTimeout(() => {
         setNodes((currentNodes) => {
           const updatedNodes = currentNodes.map(node => {
@@ -201,7 +220,6 @@ const WorkflowDesignerContent: React.FC = () => {
             return node;
           });
           
-          // Update Redux store with new node positions
           dispatch(updateWorkflowNodes(updatedNodes.map(node => ({
             id: node.id,
             type: node.type as any,
@@ -220,7 +238,6 @@ const WorkflowDesignerContent: React.FC = () => {
     (changes: any) => {
       onEdgesChange(changes);
       
-      // Update Redux store with edge changes
       setTimeout(() => {
         setEdges((currentEdges) => {
           dispatch(updateWorkflowEdges(currentEdges.map(edge => ({
@@ -241,6 +258,16 @@ const WorkflowDesignerContent: React.FC = () => {
     dispatch(setWorkflowMode(false));
   };
 
+  const handleSaveWorkflow = () => {
+    console.log('Saving workflow:', currentWorkflow);
+    // Here you would typically save to a backend
+  };
+
+  const handleToggleActive = () => {
+    // Toggle workflow active state
+    console.log('Toggle workflow active state');
+  };
+
   if (!currentWorkflow) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
@@ -253,14 +280,74 @@ const WorkflowDesignerContent: React.FC = () => {
   }
 
   return (
-    <div className="h-screen flex bg-gray-50">
-      {/* Workflow Sidebar */}
-      <WorkflowSidebar />
+    <div className="h-screen flex flex-col lg:flex-row bg-gray-50">
+      {/* Mobile Header */}
+      <div className="lg:hidden bg-white border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setShowSidebar(true)}
+              className="p-2 hover:bg-gray-100 rounded-lg"
+            >
+              <Menu className="w-5 h-5 text-gray-600" />
+            </button>
+            <div>
+              <h1 className="text-lg font-semibold text-gray-800 truncate">
+                {currentWorkflow.name}
+              </h1>
+              <p className="text-xs text-gray-500">Form: {currentForm?.name}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <span className={`px-2 py-1 text-xs rounded-full ${
+              currentWorkflow.isActive 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-gray-100 text-gray-800'
+            }`}>
+              {currentWorkflow.isActive ? 'Active' : 'Inactive'}
+            </span>
+            <button
+              onClick={handleSaveWorkflow}
+              className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white rounded-md text-sm"
+            >
+              <Save className="w-4 h-4" />
+              <span className="hidden sm:inline">Save</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
-      {/* Main Workflow Canvas */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <WorkflowSidebar />
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {showSidebar && isMobile && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowSidebar(false)} />
+          <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800">Workflow Builder</h2>
+              <button
+                onClick={() => setShowSidebar(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="h-full overflow-hidden">
+              <WorkflowSidebar />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Canvas */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Desktop Header */}
+        <div className="hidden lg:flex bg-white border-b border-gray-200 px-6 py-4 items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={handleBackToForm}
@@ -271,7 +358,9 @@ const WorkflowDesignerContent: React.FC = () => {
             </button>
             <div>
               <h2 className="text-lg font-semibold text-gray-800">{currentWorkflow.name}</h2>
-              <p className="text-sm text-gray-600">Form: {currentForm?.name}</p>
+              <p className="text-sm text-gray-600">
+                Form: {currentForm?.name} • {nodes.length} node{nodes.length !== 1 ? 's' : ''}
+              </p>
             </div>
           </div>
           
@@ -283,14 +372,29 @@ const WorkflowDesignerContent: React.FC = () => {
             }`}>
               {currentWorkflow.isActive ? 'Active' : 'Inactive'}
             </span>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-              Save Workflow
+            <button
+              onClick={handleToggleActive}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-md font-medium transition-colors ${
+                currentWorkflow.isActive
+                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+              }`}
+            >
+              {currentWorkflow.isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+              <span>{currentWorkflow.isActive ? 'Deactivate' : 'Activate'}</span>
+            </button>
+            <button
+              onClick={handleSaveWorkflow}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save Workflow</span>
             </button>
           </div>
         </div>
 
         {/* React Flow Canvas */}
-        <div className="flex-1">
+        <div className="flex-1 relative">
           <div
             className="h-full w-full select-none"
             onDrop={handleDrop}
@@ -309,17 +413,118 @@ const WorkflowDesignerContent: React.FC = () => {
               deleteKeyCode={null}
               multiSelectionKeyCode={null}
               className="cursor-default"
+              minZoom={0.1}
+              maxZoom={2}
+              defaultViewport={{ x: 0, y: 0, zoom: isMobile ? 0.6 : 0.8 }}
             >
-              <Controls />
-              <MiniMap />
-              <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+              <Controls className="!bottom-4 !left-4" />
+              <MiniMap 
+                className={`!bottom-4 !right-4 ${isMobile ? '!w-32 !h-24' : '!w-48 !h-32'}`}
+                nodeColor="#3b82f6"
+                maskColor="rgba(0, 0, 0, 0.1)"
+              />
+              <Background 
+                variant={BackgroundVariant.Dots} 
+                gap={20} 
+                size={1} 
+                color="#e5e7eb"
+              />
+              
+              {/* Mobile Action Buttons */}
+              {isMobile && (
+                <Panel position="top-right" className="lg:hidden">
+                  <div className="flex flex-col space-y-2">
+                    <button
+                      onClick={() => setShowSidebar(true)}
+                      className="p-3 bg-white rounded-full shadow-lg border border-gray-200 hover:bg-gray-50"
+                    >
+                      <Plus className="w-5 h-5 text-gray-600" />
+                    </button>
+                    {selectedNode && (
+                      <button
+                        onClick={() => setShowProperties(true)}
+                        className="p-3 bg-blue-600 rounded-full shadow-lg text-white hover:bg-blue-700"
+                      >
+                        <Menu className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                </Panel>
+              )}
+
+              {/* Mobile Instructions */}
+              <Panel position="top-center" className="lg:hidden">
+                <div className="bg-white rounded-lg shadow-lg p-3 mx-4 border border-gray-200 max-w-sm">
+                  <p className="text-xs text-gray-600 text-center">
+                    Tap + to add nodes • Tap nodes to select • Use controls to zoom and pan
+                  </p>
+                </div>
+              </Panel>
+
+              {/* Empty State */}
+              {nodes.length <= 2 && (
+                <Panel position="top-center" className="hidden lg:block">
+                  <div className="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto border border-gray-200">
+                    <div className="text-center">
+                      <div className="text-4xl mb-4">🔄</div>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                        Start Building Your Workflow
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Drag components from the sidebar to create your workflow. Connect nodes with conditions, actions, and parallel processes.
+                      </p>
+                      <div className="text-xs text-gray-500">
+                        <p>• Drag nodes from the sidebar</p>
+                        <p>• Connect nodes by dragging from handles</p>
+                        <p>• Click nodes to configure properties</p>
+                      </div>
+                    </div>
+                  </div>
+                </Panel>
+              )}
             </ReactFlow>
           </div>
         </div>
+
+        {/* Mobile Back Button */}
+        <div className="lg:hidden fixed bottom-4 left-4 z-40">
+          <button
+            onClick={handleBackToForm}
+            className="flex items-center space-x-2 px-4 py-2 bg-white rounded-full shadow-lg border border-gray-200 hover:bg-gray-50"
+          >
+            <ArrowLeft className="w-4 h-4 text-gray-600" />
+            <span className="text-sm text-gray-600">Back</span>
+          </button>
+        </div>
       </div>
 
-      {/* Properties Panel */}
-      <WorkflowProperties />
+      {/* Desktop Properties Panel */}
+      <div className="hidden xl:block">
+        <WorkflowProperties />
+      </div>
+
+      {/* Mobile Properties Modal */}
+      {showProperties && selectedNode && isMobile && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowProperties(false)} />
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-xl max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Node Properties
+              </h3>
+              <button
+                onClick={() => setShowProperties(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="overflow-y-auto">
+              <WorkflowProperties />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

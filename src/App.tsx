@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage/LandingPage';
 import FormBuilder from './components/FormBuilder/FormBuilder';
-import WorkflowCreator from './components/WorkflowCreator/WorkflowCreator';
+import WorkflowCreator from './components/workflowCreator/WorkflowCreator';
 import WorkflowDemo from './components/WorkflowDemo';
 
 function App() {
