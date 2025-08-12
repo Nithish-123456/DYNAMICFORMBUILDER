@@ -1,6 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight, Users, Clock, CheckCircle, XCircle, AlertCircle, Play } from 'lucide-react';
 
+// Mock data for development
+const mockWorkflows: Workflow[] = [
+  { workflowInstanceId: 1, workflowName: 'Employee Onboarding Process' },
+  { workflowInstanceId: 2, workflowName: 'Leave Request Approval' },
+  { workflowInstanceId: 3, workflowName: 'Expense Report Processing' },
+  { workflowInstanceId: 4, workflowName: 'Performance Review Cycle' },
+  { workflowInstanceId: 5, workflowName: 'IT Equipment Request' }
+];
+
+const mockActiveWorkflowDetails: Record<number, ActiveWorkflowDetail[]> = {
+  1: [
+    { formName: 'Personal Information Form', activelevel: 1, user: 'HR001' },
+    { formName: 'IT Setup Form', activelevel: 2, user: 'IT001' },
+    { formName: 'Training Schedule Form', activelevel: 3, user: 'TRN001' }
+  ],
+  2: [
+    { formName: 'Leave Application Form', activelevel: 1, user: 'EMP001' },
+    { formName: 'Manager Approval Form', activelevel: 2, user: 'MGR001' }
+  ],
+  3: [
+    { formName: 'Expense Details Form', activelevel: 1, user: 'EMP002' },
+    { formName: 'Receipt Verification Form', activelevel: 2, user: 'ACC001' },
+    { formName: 'Final Approval Form', activelevel: 3, user: 'MGR002' }
+  ]
+};
+
+const mockWorkflowForms: Record<number, WorkflowForm[]> = {
+  1: [
+    { formName: 'Personal Information Form', formStatus: 3 },
+    { formName: 'IT Setup Form', formStatus: 1 },
+    { formName: 'Training Schedule Form', formStatus: 2 }
+  ],
+  2: [
+    { formName: 'Leave Application Form', formStatus: 3 },
+    { formName: 'Manager Approval Form', formStatus: 1 }
+  ],
+  3: [
+    { formName: 'Expense Details Form', formStatus: 3 },
+    { formName: 'Receipt Verification Form', formStatus: 1 },
+    { formName: 'Final Approval Form', formStatus: 2 }
+  ]
+};
+
+const mockFormDetails: Record<number, FormDetail[]> = {
+  0: [
+    { level: 1, user: 'HR001', status: 3 },
+    { level: 2, user: 'HR002', status: 1 },
+    { level: 3, user: 'MGR001', status: 2 }
+  ],
+  1: [
+    { level: 1, user: 'IT001', status: 1 },
+    { level: 2, user: 'IT002', status: 2 }
+  ],
+  2: [
+    { level: 1, user: 'TRN001', status: 2 },
+    { level: 2, user: 'TRN002', status: 2 }
+  ]
+};
+
 // Type definitions
 interface Workflow {
   workflowInstanceId: number;
@@ -45,6 +104,8 @@ const WorkflowDemo: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
+  // Use mock data instead of API calls for development
+  const USE_MOCK_DATA = true;
   const API_BASE_URL = 'https://localhost:7107/api';
 
   // Fetch workflows for dropdown
@@ -53,6 +114,16 @@ const WorkflowDemo: React.FC = () => {
   }, []);
 
   const fetchWorkflows = async (): Promise<void> => {
+    if (USE_MOCK_DATA) {
+      setLoading(true);
+      // Simulate API delay
+      setTimeout(() => {
+        setWorkflows(mockWorkflows);
+        setLoading(false);
+      }, 500);
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/GetInitiatedWorkflowsList`);
@@ -74,6 +145,20 @@ const WorkflowDemo: React.FC = () => {
     if (!workflowInstanceId) {
       setActiveWorkflowDetails([]);
       setWorkflowForms([]);
+      return;
+    }
+
+    if (USE_MOCK_DATA) {
+      setLoading(true);
+      // Simulate API delay
+      setTimeout(() => {
+        const id = parseInt(workflowInstanceId);
+        setActiveWorkflowDetails(mockActiveWorkflowDetails[id] || []);
+        setWorkflowForms(mockWorkflowForms[id] || []);
+        setFormDetails({}); // Clear previous form details
+        setExpandedRows(new Set()); // Clear expanded rows
+        setLoading(false);
+      }, 300);
       return;
     }
 
@@ -109,6 +194,20 @@ const WorkflowDemo: React.FC = () => {
   // Fetch form details for drilldown
   const fetchFormDetails = async (formInstanceId: number): Promise<void> => {
     if (formDetails[formInstanceId]) return; // Already fetched
+
+    if (USE_MOCK_DATA) {
+      // Simulate API delay
+      setTimeout(() => {
+        setFormDetails(prev => ({
+          ...prev,
+          [formInstanceId]: mockFormDetails[formInstanceId] || [
+            { level: 1, user: 'USER001', status: 1 },
+            { level: 2, user: 'USER002', status: 2 }
+          ]
+        }));
+      }, 200);
+      return;
+    }
 
     try {
       const response = await fetch(`${API_BASE_URL}/GetFormDetails?formInstanceId=${formInstanceId}`);

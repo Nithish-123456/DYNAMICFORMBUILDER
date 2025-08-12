@@ -31,6 +31,18 @@ const MainTab: React.FC = () => {
     handlePropertyChange('options', options);
   };
 
+  const handleTabsChange = (tabs: any[]) => {
+    handlePropertyChange('tabs', tabs);
+  };
+
+  const handleStepsChange = (steps: any[]) => {
+    handlePropertyChange('steps', steps);
+  };
+
+  const handleMenuItemsChange = (items: any[]) => {
+    handlePropertyChange('items', items);
+  };
+
   const addOption = () => {
     const currentOptions = element.properties.options || [];
     const newOption = {
@@ -52,6 +64,73 @@ const MainTab: React.FC = () => {
       i === index ? { ...option, [field]: value } : option
     );
     handleOptionsChange(updatedOptions);
+  };
+
+  const addTab = () => {
+    const currentTabs = element.properties.tabs || [];
+    const newTab = {
+      key: `tab${currentTabs.length + 1}`,
+      label: `Tab ${currentTabs.length + 1}`,
+      content: `Content ${currentTabs.length + 1}`,
+    };
+    handleTabsChange([...currentTabs, newTab]);
+  };
+
+  const removeTab = (index: number) => {
+    const currentTabs = element.properties.tabs || [];
+    handleTabsChange(currentTabs.filter((_:any, i:any) => i !== index));
+  };
+
+  const updateTab = (index: number, field: string, value: any) => {
+    const currentTabs = element.properties.tabs || [];
+    const updatedTabs = currentTabs.map((tab:any, i:any) => 
+      i === index ? { ...tab, [field]: value } : tab
+    );
+    handleTabsChange(updatedTabs);
+  };
+
+  const addStep = () => {
+    const currentSteps = element.properties.steps || [];
+    const newStep = {
+      title: `Step ${currentSteps.length + 1}`,
+      description: `Description for step ${currentSteps.length + 1}`,
+    };
+    handleStepsChange([...currentSteps, newStep]);
+  };
+
+  const removeStep = (index: number) => {
+    const currentSteps = element.properties.steps || [];
+    handleStepsChange(currentSteps.filter((_:any, i:any) => i !== index));
+  };
+
+  const updateStep = (index: number, field: string, value: any) => {
+    const currentSteps = element.properties.steps || [];
+    const updatedSteps = currentSteps.map((step:any, i:any) => 
+      i === index ? { ...step, [field]: value } : step
+    );
+    handleStepsChange(updatedSteps);
+  };
+
+  const addMenuItem = () => {
+    const currentItems = element.properties.items || [];
+    const newItem = {
+      label: `Item ${currentItems.length + 1}`,
+      value: `item${currentItems.length + 1}`,
+    };
+    handleMenuItemsChange([...currentItems, newItem]);
+  };
+
+  const removeMenuItem = (index: number) => {
+    const currentItems = element.properties.items || [];
+    handleMenuItemsChange(currentItems.filter((_:any, i:any) => i !== index));
+  };
+
+  const updateMenuItem = (index: number, field: string, value: any) => {
+    const currentItems = element.properties.items || [];
+    const updatedItems = currentItems.map((item:any, i:any) => 
+      i === index ? { ...item, [field]: value } : item
+    );
+    handleMenuItemsChange(updatedItems);
   };
 
   const renderPropertyField = (property: string, value: any, type: string = 'text') => {
@@ -104,6 +183,25 @@ const MainTab: React.FC = () => {
           [
             { value: 'static', label: 'Static Options' },
             { value: 'api', label: 'API Source' }
+          ] :
+          property === 'position' && element.type === 'tab' ?
+          [
+            { value: 'top', label: 'Top' },
+            { value: 'bottom', label: 'Bottom' },
+            { value: 'left', label: 'Left' },
+            { value: 'right', label: 'Right' }
+          ] :
+          property === 'orientation' ?
+          [
+            { value: 'vertical', label: 'Vertical' },
+            { value: 'horizontal', label: 'Horizontal' }
+          ] :
+          property === 'fit' && element.type === 'image' ?
+          [
+            { value: 'cover', label: 'Cover' },
+            { value: 'contain', label: 'Contain' },
+            { value: 'fill', label: 'Fill' },
+            { value: 'scale-down', label: 'Scale Down' }
           ] : [];
 
         return (
@@ -315,6 +413,50 @@ const MainTab: React.FC = () => {
         renderPropertyField('optionSource', element.properties.optionSource, 'select')
       }
 
+      {element.properties.position !== undefined && element.type === 'tab' &&
+        renderPropertyField('position', element.properties.position, 'select')
+      }
+
+      {element.properties.orientation !== undefined && 
+        renderPropertyField('orientation', element.properties.orientation, 'select')
+      }
+
+      {element.properties.fit !== undefined && element.type === 'image' &&
+        renderPropertyField('fit', element.properties.fit, 'select')
+      }
+
+      {element.properties.src !== undefined && element.type === 'image' &&
+        renderPropertyField('src', element.properties.src, 'text')
+      }
+
+      {element.properties.alt !== undefined && element.type === 'image' &&
+        renderPropertyField('alt', element.properties.alt, 'text')
+      }
+
+      {element.properties.href !== undefined && element.type === 'link' &&
+        renderPropertyField('href', element.properties.href, 'text')
+      }
+
+      {element.properties.target !== undefined && element.type === 'link' &&
+        renderPropertyField('target', element.properties.target, 'select')
+      }
+
+      {element.properties.content !== undefined && element.type === 'staticcontent' &&
+        renderPropertyField('content', element.properties.content, 'textarea')
+      }
+
+      {element.properties.format !== undefined && 
+        renderPropertyField('format', element.properties.format, 'text')
+      }
+
+      {element.properties.message !== undefined && 
+        renderPropertyField('message', element.properties.message, 'text')
+      }
+
+      {element.properties.type !== undefined && ['message', 'errormessage'].includes(element.type) &&
+        renderPropertyField('type', element.properties.type, 'select')
+      }
+
       {/* Advanced properties */}
       {componentDef?.advancedProps && (
         <div className="pt-4 border-t border-gray-200">
@@ -346,6 +488,176 @@ const MainTab: React.FC = () => {
 
       {/* Options Manager */}
       {renderOptionsManager()}
+  const renderTabsManager = () => {
+      {/* Tabs Manager */}
+      {renderTabsManager()}
+
+      {/* Steps Manager */}
+      {renderStepsManager()}
+
+      {/* Menu Items Manager */}
+      {renderMenuItemsManager()}
+
+    if (element.type !== 'tab') return null;
+
+    const tabs = element.properties.tabs || [];
+
+    return (
+      <div className="pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-gray-700">Tabs</h4>
+          <button
+            onClick={addTab}
+            className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+          >
+            <Plus className="w-3 h-3" />
+            <span>Add</span>
+          </button>
+        </div>
+        
+        <div className="space-y-2 max-h-40 overflow-y-auto">
+          {tabs.map((tab: any, index: number) => (
+            <div key={index} className="p-2 bg-gray-50 rounded">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-700">Tab {index + 1}</span>
+                <button
+                  onClick={() => removeTab(index)}
+                  className="p-1 text-red-500 hover:bg-red-100 rounded"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Tab Label"
+                  value={tab.label}
+                  onChange={(e) => updateTab(index, 'label', e.target.value)}
+                  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Tab Key"
+                  value={tab.key}
+                  onChange={(e) => updateTab(index, 'key', e.target.value)}
+                  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                />
+                <textarea
+                  placeholder="Tab Content"
+                  value={tab.content}
+                  onChange={(e) => updateTab(index, 'content', e.target.value)}
+                  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                  rows={2}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderStepsManager = () => {
+    if (!['wizard', 'wizardstep'].includes(element.type)) return null;
+
+    const steps = element.properties.steps || [];
+
+    return (
+      <div className="pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-gray-700">Steps</h4>
+          <button
+            onClick={addStep}
+            className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+          >
+            <Plus className="w-3 h-3" />
+            <span>Add</span>
+          </button>
+        </div>
+        
+        <div className="space-y-2 max-h-40 overflow-y-auto">
+          {steps.map((step: any, index: number) => (
+            <div key={index} className="p-2 bg-gray-50 rounded">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-700">Step {index + 1}</span>
+                <button
+                  onClick={() => removeStep(index)}
+                  className="p-1 text-red-500 hover:bg-red-100 rounded"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Step Title"
+                  value={step.title}
+                  onChange={(e) => updateStep(index, 'title', e.target.value)}
+                  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                />
+                <textarea
+                  placeholder="Step Description"
+                  value={step.description}
+                  onChange={(e) => updateStep(index, 'description', e.target.value)}
+                  className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                  rows={2}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderMenuItemsManager = () => {
+    if (element.type !== 'menu') return null;
+
+    const items = element.properties.items || [];
+
+    return (
+      <div className="pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-gray-700">Menu Items</h4>
+          <button
+            onClick={addMenuItem}
+            className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+          >
+            <Plus className="w-3 h-3" />
+            <span>Add</span>
+          </button>
+        </div>
+        
+        <div className="space-y-2 max-h-40 overflow-y-auto">
+          {items.map((item: any, index: number) => (
+            <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded">
+              <input
+                type="text"
+                placeholder="Label"
+                value={item.label}
+                onChange={(e) => updateMenuItem(index, 'label', e.target.value)}
+                className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Value"
+                value={item.value}
+                onChange={(e) => updateMenuItem(index, 'value', e.target.value)}
+                className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded"
+              />
+              <button
+                onClick={() => removeMenuItem(index)}
+                className="p-1 text-red-500 hover:bg-red-100 rounded"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
 
       {/* Grid properties */}
       <div className="pt-4 border-t border-gray-200">
