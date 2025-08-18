@@ -24,6 +24,13 @@ export interface FormElement {
     y: number;
     w: number;
     h: number;
+    minW?: number;
+    minH?: number;
+    maxW?: number;
+    maxH?: number;
+    isResizable?: boolean;
+    isDraggable?: boolean;
+    static?: boolean;
   };
 }
 

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { selectElement, removeElement, duplicateElement } from '../../../store/slices/formBuilderSlice';
 import { FormElement as FormElementType } from '../../../types/form';
 import { getComponentDefinition } from '../../../constants/components';
 import { Trash2, Copy, Upload, X, Calendar, Clock, Search, Tag, Palette, Eye, EyeOff } from 'lucide-react';
+import QRCode from 'react-qr-code';
 
 // Autocomplete Component
 const AutocompleteComponent: React.FC<{ element: FormElementType; isPreview: boolean }> = ({ element, isPreview }) => {
@@ -250,10 +251,78 @@ const SearchComponent: React.FC<{ element: FormElementType; isPreview: boolean }
   );
 };
 
-// Signature Component
+// Signature Component (canvas-based)
 const SignatureComponent: React.FC<{ element: FormElementType; isPreview: boolean }> = ({ element, isPreview }) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [signature, setSignature] = useState('');
+  const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
+
+  const width = element.properties.width || 400;
+  const height = element.properties.height || 200;
+  const penColor = element.properties.penColor || '#000000';
+  const backgroundColor = element.properties.backgroundColor || '#ffffff';
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }, [backgroundColor, width, height]);
+
+  const getPos = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  };
+
+  const drawLine = (from: { x: number; y: number }, to: { x: number; y: number }) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    ctx.strokeStyle = penColor;
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+  };
+
+  const handleStart = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isPreview) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    setIsDrawing(true);
+    setLastPoint(pos);
+  };
+
+  const handleMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isPreview || !isDrawing || !lastPoint) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    drawLine(lastPoint, pos);
+    setLastPoint(pos);
+  };
+
+  const handleEnd = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isPreview) return;
+    e.preventDefault();
+    setIsDrawing(false);
+    setLastPoint(null);
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  };
 
   return (
     <div className="h-full">
@@ -262,19 +331,25 @@ const SignatureComponent: React.FC<{ element: FormElementType; isPreview: boolea
           {element.properties.label}
         </label>
       )}
-      <div className="border-2 border-dashed border-gray-300 rounded-md p-4 bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-2">✍️</div>
-          <p className="text-sm text-gray-600">Signature Pad</p>
-          <p className="text-xs text-gray-500 mt-1">
-            {element.properties.width}x{element.properties.height}px
-          </p>
-          {isPreview && (
-            <button className="mt-2 px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
-              Clear
-            </button>
-          )}
-        </div>
+      <div className="border border-gray-300 rounded-md bg-white p-2">
+        <canvas
+          ref={canvasRef}
+          width={width}
+          height={height}
+          className={`w-full border border-dashed rounded ${!isPreview ? 'opacity-60 cursor-not-allowed' : 'cursor-crosshair'}`}
+          onMouseDown={handleStart}
+          onMouseMove={handleMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleStart}
+          onTouchMove={handleMove}
+          onTouchEnd={handleEnd}
+        />
+        {isPreview && (
+          <div className="mt-2 flex justify-end">
+            <button onClick={clear} className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200">Clear</button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -513,11 +588,14 @@ const PatternFormatComponent: React.FC<{ element: FormElementType; isPreview: bo
   );
 };
 
-// Rich Text Editor Component
+// Rich Text Editor Component (contenteditable + basic toolbar)
 const RichTextEditorComponent: React.FC<{ element: FormElementType; isPreview: boolean }> = ({ element, isPreview }) => {
-  const [content, setContent] = useState('');
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const exec = (command: string) => {
+    if (!isPreview) return;
+    document.execCommand(command);
+    editorRef.current?.focus();
+  };
 
   return (
     <div className="h-full">
@@ -527,43 +605,36 @@ const RichTextEditorComponent: React.FC<{ element: FormElementType; isPreview: b
         </label>
       )}
       <div className="border border-gray-300 rounded-md">
-        {/* Toolbar */}
         <div className="border-b border-gray-300 p-2 flex space-x-2">
-          <button
-            onClick={() => setIsBold(!isBold)}
-            className={`px-2 py-1 text-sm rounded ${isBold ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
-            disabled={!isPreview}
-          >
-            <strong>B</strong>
-          </button>
-          <button
-            onClick={() => setIsItalic(!isItalic)}
-            className={`px-2 py-1 text-sm rounded ${isItalic ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
-            disabled={!isPreview}
-          >
-            <em>I</em>
-          </button>
-          <button className="px-2 py-1 text-sm rounded hover:bg-gray-100" disabled={!isPreview}>
-            U
-          </button>
+          <button onClick={() => exec('bold')} className="px-2 py-1 text-sm rounded hover:bg-gray-100" disabled={!isPreview}><strong>B</strong></button>
+          <button onClick={() => exec('italic')} className="px-2 py-1 text-sm rounded hover:bg-gray-100" disabled={!isPreview}><em>I</em></button>
+          <button onClick={() => exec('underline')} className="px-2 py-1 text-sm rounded hover:bg-gray-100" disabled={!isPreview}>U</button>
         </div>
-        {/* Editor */}
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="w-full p-3 border-none outline-none resize-none"
+        <div
+          ref={editorRef}
+          contentEditable={isPreview}
+          className="w-full p-3 outline-none min-h-[120px]"
           style={{ height: element.properties.height || 200 }}
-          disabled={!isPreview}
-          placeholder="Start typing..."
+          data-placeholder="Start typing..."
         />
       </div>
     </div>
   );
 };
 
-// Google Map Component
+// Map Component (OpenStreetMap embed)
 const GoogleMapComponent: React.FC<{ element: FormElementType; isPreview: boolean }> = ({ element, isPreview }) => {
-  const [markers, setMarkers] = useState(element.properties.markers || []);
+  const [markers, setMarkers] = useState<{ lat: number; lng: number }[]>(element.properties.markers || []);
+  const center = element.properties.center || { lat: 0, lng: 0 };
+  const zoom = element.properties.zoom || 10;
+  const firstMarker = markers[0] || center;
+
+  // Simple OSM embed with a single marker (first marker)
+  const lat = firstMarker.lat;
+  const lon = firstMarker.lng;
+  const delta = 0.02; // bbox size based on zoom (very simplified)
+  const bbox = `${lon - delta},${lat - delta},${lon + delta},${lat + delta}`;
+  const src = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${encodeURIComponent(lat)},${encodeURIComponent(lon)}`;
 
   return (
     <div className="h-full">
@@ -572,17 +643,18 @@ const GoogleMapComponent: React.FC<{ element: FormElementType; isPreview: boolea
           {element.properties.label}
         </label>
       )}
-      <div className="border border-gray-300 rounded-md bg-gray-100 flex items-center justify-center h-full min-h-[200px]">
-        <div className="text-center">
-          <div className="text-4xl mb-2">🗺️</div>
-          <p className="text-sm text-gray-600">Google Map</p>
-          <p className="text-xs text-gray-500 mt-1">
-            Zoom: {element.properties.zoom || 10} | Markers: {markers.length}
-          </p>
+      <div className="border border-gray-300 rounded-md overflow-hidden bg-white">
+        <div className="relative" style={{ height: Math.max(200, (element.gridProps?.h || 4) * 60) }}>
+          <iframe title="map" className="w-full h-full" src={src} />
           {isPreview && (
-            <button className="mt-2 px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
-              Add Marker
-            </button>
+            <div className="absolute bottom-2 right-2 flex gap-2">
+              <button
+                onClick={() => setMarkers([{ lat: center.lat + Math.random() * 0.01, lng: center.lng + Math.random() * 0.01 }])}
+                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded"
+              >
+                Add Marker
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -853,25 +925,255 @@ const ProgressCircleComponent: React.FC<{ element: FormElementType }> = ({ eleme
   );
 };
 
-// QR Code Component
+// QR Code Component (using react-qr-code)
 const QRCodeComponent: React.FC<{ element: FormElementType }> = ({ element }) => (
   <div className="h-full flex items-center justify-center">
-    <div
-      className="bg-white border-2 border-gray-300 flex items-center justify-center"
-      style={{
-        width: element.properties.size,
-        height: element.properties.size,
-      }}
-    >
-      <div className="text-center">
-        <div className="text-2xl mb-1">📱</div>
-        <div className="text-xs text-gray-500">QR Code</div>
-        <div className="text-xs text-gray-400 mt-1 break-all">
-          {element.properties.value}
-        </div>
+    <QRCode
+      value={String(element.properties.value || '')}
+      size={Number(element.properties.size || 128)}
+      level={element.properties.level || 'M'}
+      bgColor={element.properties.bgColor || '#ffffff'}
+      fgColor={element.properties.fgColor || '#000000'}
+    />
+  </div>
+);
+
+// Divider Component
+const DividerComponent: React.FC<{ element: FormElementType }> = ({ element }) => {
+  const orientation = element.properties.orientation || 'horizontal';
+  const thickness = element.properties.thickness || 1;
+  const color = element.properties.color || '#e5e7eb';
+  if (orientation === 'vertical') {
+    return <div style={{ width: thickness, backgroundColor: color, height: '100%' }} />;
+  }
+  return <div style={{ height: thickness, backgroundColor: color, width: '100%' }} />;
+};
+
+// Image Component
+const ImageComponent: React.FC<{ element: FormElementType }> = ({ element }) => {
+  const fit = element.properties.fit || 'cover';
+  const src = element.properties.src || '';
+  const alt = element.properties.alt || 'Image';
+  return (
+    <div className="w-full h-full overflow-hidden bg-gray-100 flex items-center justify-center">
+      {src ? (
+        <img src={src} alt={alt} loading={element.properties.lazy ? 'lazy' : undefined} style={{ width: '100%', height: '100%', objectFit: fit }} />
+      ) : (
+        <span className="text-gray-400 text-sm">No Image</span>
+      )}
+    </div>
+  );
+};
+
+// Label Component
+const LabelComponent: React.FC<{ element: FormElementType }> = ({ element }) => {
+  const size = element.properties.size || 'medium';
+  const weight = element.properties.weight || 'normal';
+  const italic = element.properties.italic ? 'italic' : '';
+  const sizeClass = size === 'small' ? 'text-sm' : size === 'large' ? 'text-lg' : 'text-base';
+  const weightClass = weight === 'bold' ? 'font-bold' : weight === 'semibold' ? 'font-semibold' : 'font-normal';
+  return (
+    <span className={`${sizeClass} ${weightClass} ${italic}`} style={{ color: element.properties.color || undefined }}>
+      {element.properties.text || 'Label'}
+    </span>
+  );
+};
+
+// Link Component
+const LinkComponent: React.FC<{ element: FormElementType }> = ({ element }) => {
+  const underline = element.properties.underline ? 'underline' : '';
+  return (
+    <a href={element.properties.href || '#'} target={element.properties.target || '_self'} rel={element.properties.target === '_blank' ? 'noreferrer' : undefined} className={`${underline}`} style={{ color: element.properties.color || '#2563eb' }}>
+      {element.properties.text || 'Link'}
+    </a>
+  );
+};
+
+// Menu Component
+const MenuComponent: React.FC<{ element: FormElementType; isPreview: boolean }> = ({ element, isPreview }) => {
+  const orientation = element.properties.orientation || 'vertical';
+  const items = element.properties.items || [];
+  return (
+    <div className={`${orientation === 'horizontal' ? 'flex space-x-4' : 'space-y-2'}`}>
+      {items.map((item: any, idx: number) => (
+        <button key={idx} className="text-sm text-gray-700 hover:text-blue-600" disabled={!isPreview}>
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+// Message Components
+const MessageBase: React.FC<{ type: 'info' | 'success' | 'warning' | 'error'; text: string; closable?: boolean }> = ({ type, text, closable }) => {
+  const [visible, setVisible] = useState(true);
+  if (!visible) return null;
+  const colorMap: any = {
+    info: 'bg-blue-50 text-blue-800 border-blue-200',
+    success: 'bg-green-50 text-green-800 border-green-200',
+    warning: 'bg-yellow-50 text-yellow-800 border-yellow-200',
+    error: 'bg-red-50 text-red-800 border-red-200',
+  };
+  return (
+    <div className={`w-full p-3 border rounded ${colorMap[type]}`}> 
+      <div className="flex items-start justify-between">
+        <div className="text-sm">{text}</div>
+        {closable && (
+          <button onClick={() => setVisible(false)} className="text-xs text-current opacity-70 hover:opacity-100">✕</button>
+        )}
       </div>
     </div>
+  );
+};
+
+const MessageComponent: React.FC<{ element: FormElementType }> = ({ element }) => (
+  <MessageBase type={element.properties.type || 'info'} text={element.properties.text || 'Message'} closable={element.properties.closable} />
+);
+
+const ErrorMessageComponent: React.FC<{ element: FormElementType }> = ({ element }) => (
+  <MessageBase type={(element.properties.type || 'error') as any} text={element.properties.message || 'Error message'} closable={element.properties.dismissible} />
+);
+
+// Breadcrumb Component
+const BreadcrumbComponent: React.FC<{ element: FormElementType }> = ({ element }) => {
+  const items = element.properties.items || [];
+  const separator = element.properties.separator || '/';
+  return (
+    <nav className="text-sm text-gray-600">
+      {items.map((item: any, idx: number) => (
+        <span key={idx}>
+          <a href={item.href} className="hover:underline text-blue-600">{item.label}</a>
+          {idx < items.length - 1 && <span className="mx-2 text-gray-400">{separator}</span>}
+        </span>
+      ))}
+    </nav>
+  );
+};
+
+// Card Component
+const CardComponent: React.FC<{ element: FormElementType }> = ({ element }) => {
+  const bordered = element.properties.bordered !== false;
+  const hoverable = element.properties.hoverable;
+  return (
+    <div className={`w-full h-full ${bordered ? 'border border-gray-200' : ''} rounded-md bg-white ${hoverable ? 'hover:shadow-md transition-shadow' : ''} p-4`}>
+      <div className="font-medium text-gray-800 mb-2">{element.properties.title || 'Card Title'}</div>
+      <div className="text-sm text-gray-600">Card content</div>
+    </div>
+  );
+};
+
+// Container Component
+const ContainerComponent: React.FC<{ element: FormElementType }> = ({ element }) => {
+  const fluid = element.properties.fluid;
+  const centered = element.properties.centered !== false;
+  const maxWidth = element.properties.maxWidth || 1024;
+  return (
+    <div className={`${centered ? 'mx-auto' : ''}`} style={{ maxWidth: fluid ? '100%' : maxWidth }}>
+      <div className="text-gray-500 text-sm">Container</div>
+    </div>
+  );
+};
+
+// Repeater Component (simple counter)
+const RepeaterComponent: React.FC<{ element: FormElementType; isPreview: boolean }> = ({ element, isPreview }) => {
+  const minItems = element.properties.minItems || 1;
+  const maxItems = element.properties.maxItems || 10;
+  const [count, setCount] = useState(minItems);
+  return (
+    <div className="space-y-2">
+      <div className="text-sm text-gray-600">Items: {count}</div>
+      {isPreview && (
+        <div className="flex gap-2">
+          <button onClick={() => setCount(Math.max(minItems, count - 1))} className="px-2 py-1 text-xs bg-gray-100 rounded">Remove</button>
+          <button onClick={() => setCount(Math.min(maxItems, count + 1))} className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded">Add</button>
+        </div>
+      )}
+      <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
+        {Array.from({ length: count }).map((_, i) => (
+          <div key={i} className="p-2 border rounded text-xs text-gray-500">Item {i + 1}</div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Tabs Component
+const TabsComponent: React.FC<{ element: FormElementType; isPreview: boolean }> = ({ element, isPreview }) => {
+  const tabs = element.properties.tabs || [];
+  const [activeKey, setActiveKey] = useState(tabs[0]?.key || 'tab1');
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex border-b">
+        {tabs.map((t: any) => (
+          <button key={t.key} onClick={() => isPreview && setActiveKey(t.key)} className={`px-3 py-2 text-sm ${activeKey === t.key ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'} mr-2`} disabled={!isPreview}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex-1 p-3 text-sm text-gray-700">{tabs.find((t: any) => t.key === activeKey)?.content || 'Tab content'}</div>
+    </div>
+  );
+};
+
+// Wizard Component
+const WizardComponent: React.FC<{ element: FormElementType; isPreview: boolean }> = ({ element, isPreview }) => {
+  const steps = element.properties.steps || [];
+  const [current, setCurrent] = useState(element.properties.current || 0);
+  const next = () => setCurrent((c) => Math.min(c + 1, steps.length - 1));
+  const prev = () => setCurrent((c) => Math.max(c - 1, 0));
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex items-center mb-3">
+        {steps.map((s: any, idx: number) => (
+          <div key={idx} className="flex items-center">
+            <div className={`w-6 h-6 rounded-full text-xs flex items-center justify-center ${idx <= current ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{idx + 1}</div>
+            {idx < steps.length - 1 && <div className="w-8 h-px bg-gray-300 mx-2" />}
+          </div>
+        ))}
+      </div>
+      <div className="flex-1 p-3 border rounded mb-3">
+        <div className="font-medium mb-1">{steps[current]?.title || 'Step'}</div>
+        <div className="text-sm text-gray-600">{steps[current]?.description || 'Description'}</div>
+      </div>
+      {isPreview && (
+        <div className="flex gap-2">
+          <button onClick={prev} disabled={current === 0} className="px-3 py-1 text-sm bg-gray-100 rounded disabled:opacity-50">Previous</button>
+          <button onClick={next} disabled={current === steps.length - 1} className="px-3 py-1 text-sm bg-blue-600 text-white rounded disabled:opacity-50">Next</button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Wizard Step (standalone display)
+const WizardStepComponent: React.FC<{ element: FormElementType }> = ({ element }) => (
+  <div className="p-3 border rounded">
+    <div className="font-medium">{element.properties.title || 'Step'}</div>
+    <div className="text-sm text-gray-600">{element.properties.description || 'Step description'}</div>
   </div>
+);
+
+// Placeholder Graph
+const PlaceholderGraphComponent: React.FC<{ element: FormElementType }> = ({ element }) => (
+  <div className="w-full h-full flex items-center justify-center bg-gray-50 border border-dashed text-gray-400">Placeholder Graph ({element.properties.type || 'bar'})</div>
+);
+
+// Placeholder Grid
+const PlaceholderGridComponent: React.FC<{ element: FormElementType }> = ({ element }) => {
+  const rows = element.properties.rows || 3;
+  const columns = element.properties.columns || 3;
+  return (
+    <div className="w-full h-full grid gap-2" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+      {Array.from({ length: rows * columns }).map((_, i) => (
+        <div key={i} className="bg-gray-200 animate-pulse rounded h-8" />
+      ))}
+    </div>
+  );
+};
+
+// Slot Component
+const SlotComponent: React.FC<{ element: FormElementType }> = ({ element }) => (
+  <div className="w-full h-full border border-dashed rounded text-gray-400 flex items-center justify-center">Slot: {element.properties.name || 'default'} (no content)</div>
 );
 
 // Textarea Component
@@ -1012,6 +1314,23 @@ const componentRenderers: Record<string, React.FC<any>> = {
   checkbox: CheckboxComponent,
   header: HeaderComponent,
   staticcontent: StaticContentComponent,
+  divider: DividerComponent,
+  image: ImageComponent,
+  label: LabelComponent,
+  link: LinkComponent,
+  menu: MenuComponent,
+  message: MessageComponent,
+  errormessage: ErrorMessageComponent,
+  breadcrumb: BreadcrumbComponent,
+  card: CardComponent,
+  container: ContainerComponent,
+  repeater: RepeaterComponent,
+  tab: TabsComponent,
+  wizard: WizardComponent,
+  wizardstep: WizardStepComponent,
+  placeholdergraph: PlaceholderGraphComponent,
+  placeholdergrid: PlaceholderGridComponent,
+  slot: SlotComponent,
 };
 
 interface FormElementProps {
