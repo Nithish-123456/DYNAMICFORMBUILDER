@@ -2,17 +2,17 @@ import { ComponentDefinition } from '../types/form';
 
 export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
   // Fields
-  { 
-    type: 'autocomplete', 
-    category: 'fields', 
-    name: 'Autocomplete', 
-    icon: '🔍', 
-    defaultProps: { label: 'Autocomplete', options: [], placeholder: 'Type to search...', multiple: false }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 6, h: 2 },
-    advancedProps: ['multiple', 'minChars', 'maxResults', 'apiUrl'],
-    availableActions: ['onChange', 'onSelect', 'onSearch']
-  },
+  // { 
+  //   type: 'autocomplete', 
+  //   category: 'fields', 
+  //   name: 'Autocomplete', 
+  //   icon: '🔍', 
+  //   defaultProps: { label: 'Autocomplete', options: [], placeholder: 'Type to search...', multiple: false }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 6, h: 2 },
+  //   advancedProps: ['multiple', 'minChars', 'maxResults', 'apiUrl'],
+  //   availableActions: ['onChange', 'onSelect', 'onSearch']
+  // },
   { 
     type: 'calendar', 
     category: 'fields', 
@@ -67,17 +67,17 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     advancedProps: ['multiple', 'searchable', 'clearable', 'optionSource', 'apiUrl', 'labelField', 'valueField'],
     availableActions: ['onChange', 'onOpen', 'onClose', 'onSearch']
   },
-  { 
-    type: 'googlemap', 
-    category: 'fields', 
-    name: 'Google Map', 
-    icon: '🗺️', 
-    defaultProps: { label: 'Map', zoom: 10, center: { lat: 0, lng: 0 }, markers: [] }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 12, h: 6 },
-    advancedProps: ['zoom', 'center', 'markers', 'mapType', 'controls'],
-    availableActions: ['onMapClick', 'onMarkerClick', 'onZoomChange']
-  },
+  // { 
+  //   type: 'googlemap', 
+  //   category: 'fields', 
+  //   name: 'Google Map', 
+  //   icon: '🗺️', 
+  //   defaultProps: { label: 'Map', zoom: 10, center: { lat: 0, lng: 0 }, markers: [] }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 12, h: 6 },
+  //   advancedProps: ['zoom', 'center', 'markers', 'mapType', 'controls'],
+  //   availableActions: ['onMapClick', 'onMarkerClick', 'onZoomChange']
+  // },
   { 
     type: 'input', 
     category: 'fields', 
@@ -140,17 +140,17 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     advancedProps: ['toolbar', 'height', 'plugins', 'formats'],
     availableActions: ['onChange', 'onFocus', 'onBlur']
   },
-  { 
-    type: 'search', 
-    category: 'fields', 
-    name: 'Search', 
-    icon: '🔍', 
-    defaultProps: { label: 'Search', placeholder: 'Search...', debounce: 300 }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 6, h: 2 },
-    advancedProps: ['debounce', 'minChars', 'searchUrl'],
-    availableActions: ['onSearch', 'onChange', 'onClear']
-  },
+  // { 
+  //   type: 'search', 
+  //   category: 'fields', 
+  //   name: 'Search', 
+  //   icon: '🔍', 
+  //   defaultProps: { label: 'Search', placeholder: 'Search...', debounce: 300 }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 6, h: 2 },
+  //   advancedProps: ['debounce', 'minChars', 'searchUrl'],
+  //   availableActions: ['onSearch', 'onChange', 'onClear']
+  // },
   { 
     type: 'signature', 
     category: 'fields', 
@@ -162,17 +162,17 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     advancedProps: ['width', 'height', 'penColor', 'backgroundColor'],
     availableActions: ['onChange', 'onClear', 'onEnd']
   },
-  { 
-    type: 'tagpicker', 
-    category: 'fields', 
-    name: 'Tag Picker', 
-    icon: '🏷️', 
-    defaultProps: { label: 'Tags', options: [], allowCustom: true, maxTags: 0 }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 6, h: 2 },
-    advancedProps: ['allowCustom', 'maxTags', 'separator', 'apiUrl'],
-    availableActions: ['onChange', 'onAdd', 'onRemove']
-  },
+  // { 
+  //   type: 'tagpicker', 
+  //   category: 'fields', 
+  //   name: 'Tag Picker', 
+  //   icon: '🏷️', 
+  //   defaultProps: { label: 'Tags', options: [], allowCustom: true, maxTags: 0 }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 6, h: 2 },
+  //   advancedProps: ['allowCustom', 'maxTags', 'separator', 'apiUrl'],
+  //   availableActions: ['onChange', 'onAdd', 'onRemove']
+  // },
   { 
     type: 'textarea', 
     category: 'fields', 
@@ -195,17 +195,17 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     advancedProps: ['format', 'step', 'minTime', 'maxTime'],
     availableActions: ['onChange', 'onOpen', 'onClose']
   },
-  { 
-    type: 'toggle', 
-    category: 'fields', 
-    name: 'Toggle', 
-    icon: '🔄', 
-    defaultProps: { label: 'Toggle', checked: false, size: 'medium' }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 6, h: 1 },
-    advancedProps: ['size', 'color', 'disabled'],
-    availableActions: ['onChange', 'onClick']
-  },
+  // { 
+  //   type: 'toggle', 
+  //   category: 'fields', 
+  //   name: 'Toggle', 
+  //   icon: '🔄', 
+  //   defaultProps: { label: 'Toggle', checked: false, size: 'medium' }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 6, h: 1 },
+  //   advancedProps: ['size', 'color', 'disabled'],
+  //   availableActions: ['onChange', 'onClick']
+  // },
   { 
     type: 'uploader', 
     category: 'fields', 
@@ -230,28 +230,28 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     advancedProps: ['variant', 'size', 'disabled', 'loading', 'icon'],
     availableActions: ['onClick', 'onMouseEnter', 'onMouseLeave']
   },
-  { 
-    type: 'divider', 
-    category: 'static', 
-    name: 'Divider', 
-    icon: '➖', 
-    defaultProps: { orientation: 'horizontal', thickness: 1, color: '#e5e7eb' }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 12, h: 1 },
-    advancedProps: ['orientation', 'thickness', 'color', 'dashed'],
-    availableActions: []
-  },
-  { 
-    type: 'errormessage', 
-    category: 'static', 
-    name: 'Error Message', 
-    icon: '❌', 
-    defaultProps: { message: 'Error message', type: 'error', dismissible: false }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 6, h: 1 },
-    advancedProps: ['type', 'dismissible', 'autoHide', 'duration'],
-    availableActions: ['onDismiss']
-  },
+  // { 
+  //   type: 'divider', 
+  //   category: 'static', 
+  //   name: 'Divider', 
+  //   icon: '➖', 
+  //   defaultProps: { orientation: 'horizontal', thickness: 1, color: '#e5e7eb' }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 12, h: 1 },
+  //   advancedProps: ['orientation', 'thickness', 'color', 'dashed'],
+  //   availableActions: []
+  // },
+  // { 
+  //   type: 'errormessage', 
+  //   category: 'static', 
+  //   name: 'Error Message', 
+  //   icon: '❌', 
+  //   defaultProps: { message: 'Error message', type: 'error', dismissible: false }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 6, h: 1 },
+  //   advancedProps: ['type', 'dismissible', 'autoHide', 'duration'],
+  //   availableActions: ['onDismiss']
+  // },
   { 
     type: 'header', 
     category: 'static', 
@@ -324,72 +324,72 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     advancedProps: ['type', 'closable', 'showIcon', 'banner'],
     availableActions: ['onClose']
   },
-  { 
-    type: 'placeholdergraph', 
-    category: 'static', 
-    name: 'Placeholder Graph', 
-    icon: '📊', 
-    defaultProps: { type: 'bar', animated: true }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 8, h: 4 },
-    advancedProps: ['type', 'animated', 'color', 'showGrid'],
-    availableActions: []
-  },
-  { 
-    type: 'placeholdergrid', 
-    category: 'static', 
-    name: 'Placeholder Grid', 
-    icon: '🔲', 
-    defaultProps: { rows: 3, columns: 3, animated: true }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 8, h: 4 },
-    advancedProps: ['rows', 'columns', 'animated', 'spacing'],
-    availableActions: []
-  },
-  { 
-    type: 'progressline', 
-    category: 'static', 
-    name: 'Progress Line', 
-    icon: '📶', 
-    defaultProps: { value: 50, max: 100, showText: true, color: '#3b82f6' }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 6, h: 1 },
-    advancedProps: ['max', 'showText', 'color', 'striped', 'animated'],
-    availableActions: ['onChange']
-  },
-  { 
-    type: 'progresscircle', 
-    category: 'static', 
-    name: 'Progress Circle', 
-    icon: '⭕', 
-    defaultProps: { value: 50, max: 100, size: 120, strokeWidth: 8 }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 4, h: 4 },
-    advancedProps: ['max', 'size', 'strokeWidth', 'color', 'showText'],
-    availableActions: ['onChange']
-  },
-  { 
-    type: 'qrcode', 
-    category: 'static', 
-    name: 'QR Code', 
-    icon: '📱', 
-    defaultProps: { value: 'QR Code', size: 128, level: 'M' }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 4, h: 4 },
-    advancedProps: ['size', 'level', 'includeMargin', 'fgColor', 'bgColor'],
-    availableActions: ['onClick']
-  },
-  { 
-    type: 'staticcontent', 
-    category: 'static', 
-    name: 'Static Content', 
-    icon: '📄', 
-    defaultProps: { content: 'Static content', format: 'text' }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 6, h: 2 },
-    advancedProps: ['format', 'sanitize', 'linkify'],
-    availableActions: ['onClick']
-  },
+  // { 
+  //   type: 'placeholdergraph', 
+  //   category: 'static', 
+  //   name: 'Placeholder Graph', 
+  //   icon: '📊', 
+  //   defaultProps: { type: 'bar', animated: true }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 8, h: 4 },
+  //   advancedProps: ['type', 'animated', 'color', 'showGrid'],
+  //   availableActions: []
+  // },
+  // { 
+  //   type: 'placeholdergrid', 
+  //   category: 'static', 
+  //   name: 'Placeholder Grid', 
+  //   icon: '🔲', 
+  //   defaultProps: { rows: 3, columns: 3, animated: true }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 8, h: 4 },
+  //   advancedProps: ['rows', 'columns', 'animated', 'spacing'],
+  //   availableActions: []
+  // },
+  // { 
+  //   type: 'progressline', 
+  //   category: 'static', 
+  //   name: 'Progress Line', 
+  //   icon: '📶', 
+  //   defaultProps: { value: 50, max: 100, showText: true, color: '#3b82f6' }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 6, h: 1 },
+  //   advancedProps: ['max', 'showText', 'color', 'striped', 'animated'],
+  //   availableActions: ['onChange']
+  // },
+  // { 
+  //   type: 'progresscircle', 
+  //   category: 'static', 
+  //   name: 'Progress Circle', 
+  //   icon: '⭕', 
+  //   defaultProps: { value: 50, max: 100, size: 120, strokeWidth: 8 }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 4, h: 4 },
+  //   advancedProps: ['max', 'size', 'strokeWidth', 'color', 'showText'],
+  //   availableActions: ['onChange']
+  // },
+  // { 
+  //   type: 'qrcode', 
+  //   category: 'static', 
+  //   name: 'QR Code', 
+  //   icon: '📱', 
+  //   defaultProps: { value: 'QR Code', size: 128, level: 'M' }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 4, h: 4 },
+  //   advancedProps: ['size', 'level', 'includeMargin', 'fgColor', 'bgColor'],
+  //   availableActions: ['onClick']
+  // },
+  // { 
+  //   type: 'staticcontent', 
+  //   category: 'static', 
+  //   name: 'Static Content', 
+  //   icon: '📄', 
+  //   defaultProps: { content: 'Static content', format: 'text' }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 6, h: 2 },
+  //   advancedProps: ['format', 'sanitize', 'linkify'],
+  //   availableActions: ['onClick']
+  // },
 
   // Structure
   { 
@@ -431,17 +431,17 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     advancedProps: ['fluid', 'centered', 'maxWidth'],
     availableActions: []
   },
-  { 
-    type: 'repeater', 
-    category: 'structure', 
-    name: 'Repeater', 
-    icon: '🔄', 
-    defaultProps: { dataSource: 'static', minItems: 1, maxItems: 10 }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 12, h: 6 },
-    advancedProps: ['dataSource', 'minItems', 'maxItems', 'addButton', 'removeButton'],
-    availableActions: ['onAdd', 'onRemove', 'onChange']
-  },
+  // { 
+  //   type: 'repeater', 
+  //   category: 'structure', 
+  //   name: 'Repeater', 
+  //   icon: '🔄', 
+  //   defaultProps: { dataSource: 'static', minItems: 1, maxItems: 10 }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 12, h: 6 },
+  //   advancedProps: ['dataSource', 'minItems', 'maxItems', 'addButton', 'removeButton'],
+  //   availableActions: ['onAdd', 'onRemove', 'onChange']
+  // },
   { 
     type: 'tab', 
     category: 'structure', 
@@ -459,47 +459,47 @@ export const COMPONENT_DEFINITIONS: ComponentDefinition[] = [
     advancedProps: ['position', 'type', 'size', 'closable'],
     availableActions: ['onChange', 'onTabClick', 'onEdit']
   },
-  { 
-    type: 'wizard', 
-    category: 'structure', 
-    name: 'Wizard', 
-    icon: '🧙', 
-    defaultProps: { 
-      steps: [
-        { title: 'Step 1', description: 'First step' },
-        { title: 'Step 2', description: 'Second step' }
-      ], 
-      current: 0 
-    }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 12, h: 8 },
-    advancedProps: ['direction', 'size', 'status', 'progressDot'],
-    availableActions: ['onChange', 'onNext', 'onPrev', 'onFinish']
-  },
-  { 
-    type: 'wizardstep', 
-    category: 'structure', 
-    name: 'Wizard Step', 
-    icon: '👣', 
-    defaultProps: { title: 'Step', description: 'Step description', status: 'wait' }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 12, h: 6 },
-    advancedProps: ['status', 'icon', 'disabled'],
-    availableActions: ['onClick']
-  },
+  // { 
+  //   type: 'wizard', 
+  //   category: 'structure', 
+  //   name: 'Wizard', 
+  //   icon: '🧙', 
+  //   defaultProps: { 
+  //     steps: [
+  //       { title: 'Step 1', description: 'First step' },
+  //       { title: 'Step 2', description: 'Second step' }
+  //     ], 
+  //     current: 0 
+  //   }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 12, h: 8 },
+  //   advancedProps: ['direction', 'size', 'status', 'progressDot'],
+  //   availableActions: ['onChange', 'onNext', 'onPrev', 'onFinish']
+  // },
+  // { 
+  //   type: 'wizardstep', 
+  //   category: 'structure', 
+  //   name: 'Wizard Step', 
+  //   icon: '👣', 
+  //   defaultProps: { title: 'Step', description: 'Step description', status: 'wait' }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 12, h: 6 },
+  //   advancedProps: ['status', 'icon', 'disabled'],
+  //   availableActions: ['onClick']
+  // },
 
-  // Templates
-  { 
-    type: 'slot', 
-    category: 'templates', 
-    name: 'Slot', 
-    icon: '🎰', 
-    defaultProps: { name: 'default', fallback: 'No content' }, 
-    defaultStyle: {}, 
-    defaultGridProps: { w: 6, h: 4 },
-    advancedProps: ['name', 'fallback'],
-    availableActions: []
-  },
+  // // Templates
+  // { 
+  //   type: 'slot', 
+  //   category: 'templates', 
+  //   name: 'Slot', 
+  //   icon: '🎰', 
+  //   defaultProps: { name: 'default', fallback: 'No content' }, 
+  //   defaultStyle: {}, 
+  //   defaultGridProps: { w: 6, h: 4 },
+  //   advancedProps: ['name', 'fallback'],
+  //   availableActions: []
+  // },
 ];
 
 export const getComponentsByCategory = (category: string) => {
